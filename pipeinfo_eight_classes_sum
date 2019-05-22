@@ -1,0 +1,236 @@
+import csv
+from pprint import pprint
+
+'''
+针对材料，外径，壁厚，来分类。共八种情况。
+直接读取csv文件，生成csv，不用改表头表尾，但文件必须包含材料，壁厚，外径,'起始节点名称' !!!
+需要指定 管道的默认值， 
+
+测试ok
+'''
+
+csvfilepath = r'E:\li\ilng\青岛\QDJN3_2模型原始管道信息\3-2模型原始管道信息+节点名称.csv'  # 管道文件
+csvfilepath_jiedian =  r'E:\li\ilng\青岛\QDJN3_2模型原始管道信息\3-2节点名称与坐标.csv'  # 节点文件 含坐标
+
+with open(csvfilepath, newline='') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    all_list = list()
+    for row in spamreader:
+        all_list.append(row)
+with open(csvfilepath_jiedian, newline='') as csv_jieidan:
+    spamreader = csv.reader(csv_jieidan, delimiter=' ', quotechar='|')
+    all_list_jiedian = list()
+    for row in spamreader:
+        all_list_jiedian.append(row)
+
+#pprint(all_list)
+
+#def column_attribute():
+material_letter = ''
+outerdiameter_letter = ''
+thickness_letter = ''
+startjiedian_name_letter = ''
+temp1 = list()
+for i in range(len(all_list[2])):
+    temp1.append(all_list[2][i])
+
+
+titles = ','.join(temp1)
+titles_list = titles.split(',')
+remove_num = len(all_list[2])-len(all_list[3])
+i = 0
+while i < len(titles_list):
+
+    if '(' in titles_list[i] or ')' in titles_list[i] or 'm' in titles_list[i]:
+
+        del titles_list[i]
+    i += 1
+for i in range(1,len(titles_list)):
+
+    title = titles_list[i]
+    if title is None:
+        continue
+    if '材料' in title:
+        material_letter = i
+    elif '外径' in title:
+        outerdiameter_letter = i
+    elif '壁厚' in title:
+        thickness_letter = i
+    elif '起始节点名称' in title:
+        startjiedian_name_letter = i
+
+print(titles_list)
+print(material_letter,outerdiameter_letter,thickness_letter,startjiedian_name_letter)  # 获取表头
+max_row = len(all_list)-6
+max_row_jiedian = len(all_list_jiedian)-6  # 两张表格结尾行不一样
+start_row =3
+
+pprint(all_list[max_row])
+
+pprint(all_list_jiedian[3])
+# 对于节点坐标手动指定xy的列来处理
+jiedian_x = len(titles_list)
+jiedian_y = jiedian_x +1
+
+# 愚蠢的暴力 将其实点坐标与管道匹配 得到的all_list 包含了节点
+for i in range(start_row,max_row):
+    temp = all_list[i][0].split(',')
+    for j in range(start_row,max_row_jiedian):
+        temp_1 = all_list_jiedian[j][0].split(',')
+        temp_1_name = temp_1[0]
+        if temp[startjiedian_name_letter] == temp_1_name:
+            all_list[i].append(temp_1[jiedian_x])
+            all_list[i].append(temp_1[jiedian_y])
+            break
+
+    # j = start_row
+    # while j < len(copy_all_list_jiedian)-6:
+    #     temp_1 = copy_all_list_jiedian[j][0].split(',')
+    #     temp_1_name = temp_1[0]
+    #     if temp[startjiedian_name_letter] == temp_1_name:
+    #         all_list[i].append(temp_1[jiedian_x])
+    #         all_list[i].append(temp_1[jiedian_y])
+    #         del copy_all_list_jiedian[j]
+    #     else:
+    #         j += 1
+# 建立8个列表，缺壁厚 缺外径 缺材料 等等
+bh_nowj_nocl = list()  # no 表示没有，没有壁厚 wu外径材料 0 0 5 4731 37 593 1 141
+bh_nowj_cl = list()
+bh_wj_nocl = list()
+bh_wj_cl = list()
+
+nobh_nowj_nocl = list()
+nobh_nowj_cl = list()
+nobh_wj_nocl = list()
+nobh_wj_cl = list()
+
+pprint(all_list[start_row])
+default_thick = '3.58'
+default_diameter = '26.24'
+for i in range(start_row,max_row):
+    temp_2 = all_list[i][0].split(',')
+    if temp_2[material_letter] =='' and temp_2[thickness_letter]!=default_thick and temp_2[outerdiameter_letter] == default_diameter:
+        bh_nowj_nocl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]!=default_thick and temp_2[outerdiameter_letter] == default_diameter and temp_2[material_letter] !='':
+        bh_nowj_cl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]!=default_thick and temp_2[outerdiameter_letter] != default_diameter and temp_2[material_letter] =='':
+        bh_wj_nocl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]!=default_thick and temp_2[outerdiameter_letter] != default_diameter and temp_2[material_letter] !='':
+        bh_wj_cl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]==default_thick and temp_2[outerdiameter_letter] == default_diameter and temp_2[material_letter] =='':
+        nobh_nowj_nocl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]==default_thick and temp_2[outerdiameter_letter] == default_diameter and temp_2[material_letter] !='':
+        nobh_nowj_cl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]==default_thick and temp_2[outerdiameter_letter] != default_diameter and temp_2[material_letter] =='':
+        nobh_wj_nocl.append(all_list[i])
+        continue
+    elif temp_2[thickness_letter]==default_thick and temp_2[outerdiameter_letter] != default_diameter and temp_2[material_letter] !='':
+        nobh_wj_cl.append(all_list[i])
+
+print(len(bh_nowj_nocl),len(bh_nowj_cl),len(bh_wj_nocl),len(bh_wj_cl),len(nobh_nowj_nocl),len(nobh_nowj_cl),len(nobh_wj_nocl),len(nobh_wj_cl))
+#pprint(bh_wj_nocl)
+# 存储csv文件
+titles_list.extend(['起始点X坐标','起始点Y坐标'])
+new_title_list = list()
+for i in range(len(titles_list)):
+    new_title_list.append(titles_list[i])
+print(bh_wj_nocl)
+def save_csv_file(catog_file, nametitle):
+    # catog_file is string
+    save_csv = 'E:\\li\QDJN3_2模型原始管道信息\\'+ nametitle +'-管道数-'+ str(len(catog_file))+ '.csv'
+    with open(save_csv, 'w', newline='') as savecsvfile:
+        writer_csv = csv.writer(savecsvfile, delimiter=',')
+        all_bh_wj_cl = list()
+
+        writer_csv.writerows(new_title_list)
+        if len(catog_file) !=0:
+            for i in range(len(catog_file)):
+
+                new_temp_nobhnowjnocl=catog_file[i][0].split(',')
+                new_temp_nobhnowjnocl.append(catog_file[i][1])
+                new_temp_nobhnowjnocl.append(catog_file[i][2])
+                all_bh_wj_cl.append(new_temp_nobhnowjnocl)
+            writer_csv.writerows(all_bh_wj_cl)
+        else:
+            writer_csv.writerows('没有该类型管道')
+name_titles = ['有壁厚无外径无材料','有壁厚无外径有材料','有壁厚有外径无材料','有壁厚有外径有材料','无壁厚无外径无材料','无壁厚无外径有材料', '无壁厚有外径无材料', '无壁厚有外径有材料']
+all_all_bhwjcl=[bh_nowj_nocl,bh_nowj_cl,bh_wj_nocl,bh_wj_cl,nobh_nowj_nocl,nobh_nowj_cl,nobh_wj_nocl,nobh_wj_cl]
+for i in range(len(all_all_bhwjcl)):
+    save_csv_file(all_all_bhwjcl[i],name_titles[i])
+
+#save_csv_file(nobh_nowj_nocl)
+#save_csv_file(nobh_nowj_cl)
+print('ok')
+'''
+for i in range(start_row, max_row):
+
+
+    temp2 = all_list[i][0].split(',')
+
+    diameter = float(temp2[outerdiameter_letter])
+    alldict[diameter] ={}
+
+for i in range(start_row, max_row):
+
+    temp2 = all_list[i][0].split(',')
+
+    diameter = float(temp2[outerdiameter_letter])
+
+    material = temp2[material_letter]
+    if material =='':
+        material = '无材料'
+    alldict[diameter][material] = set()
+
+for i in range(start_row, max_row):
+    temp2 = all_list[i][0].split(',')
+
+    diameter = float(temp2[outerdiameter_letter])
+
+    material = temp2[material_letter]
+    if material == '':
+        material = '无材料'
+
+    thickness = temp2[thickness_letter]
+
+    alldict[diameter][material].add(thickness)
+
+def sortedDictValues2(adict):   # 对dict排序 后，返回dict
+    adict = sorted(adict.items(), key=lambda item: item[0])
+    new_adict = dict()
+    for i in range(len(adict)):
+        new_adict[adict[i][0]] = adict[i][1]
+    return new_adict
+alldict = sortedDictValues2(alldict)
+pprint(alldict)
+alllist = list()
+for key,value in alldict.items():
+
+    for material, thickness in value.items():
+        keylist = list()
+        keylist.append(key)
+        keylist.append(material)
+        for only_thickness in thickness:
+            keylist.append(only_thickness)
+
+        alllist.append(keylist)
+
+
+
+wb = Workbook(write_only=True)
+ws_2 = wb.create_sheet()
+biaotou = ['外径','材料信息','壁厚']
+ws_2.append(biaotou)
+for i in alllist:
+
+    ws_2.append(i)
+save_path ='E:\\li\\修改管径信息-2019-2-25\\test2.xlsx'
+wb.save(save_path)
+print('ok')
+'''
+
