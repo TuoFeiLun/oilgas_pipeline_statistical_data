@@ -9,8 +9,8 @@ from pprint import pprint
 测试ok
 '''
 
-csvfilepath = r'E:\li\ilng\青岛\QDJN3_2模型原始管道信息\3-2模型原始管道信息+节点名称.csv'  # 管道文件
-csvfilepath_jiedian =  r'E:\li\ilng\青岛\QDJN3_2模型原始管道信息\3-2节点名称与坐标.csv'  # 节点文件 含坐标
+csvfilepath = r'E:\li\QDJN3_2模型原始管道信息\3-2模型原始管道信息+节点名称.csv'  # 管道文件
+csvfilepath_jiedian =  r'E:\li\QDJN3_2模型原始管道信息\3-2节点名称与坐标.csv'  # 节点文件 含坐标
 
 with open(csvfilepath, newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
