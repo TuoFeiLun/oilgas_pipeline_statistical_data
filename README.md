@@ -5,5 +5,5 @@ Why I summary these pipeline data about thickness and diameter and material attr
 
 Beacause we will use pipeline simulator software to simulate gas flow in real situation. 
 
-So we should recorrect pipeline physical attribute after we have classed these pipeline information 
+We should recorrect pipeline physical attribute after we have classed these pipeline information 
 
